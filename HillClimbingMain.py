@@ -8,7 +8,13 @@ import random
 
 NUM_CLIMBERS = 15
 WINDOW_SIZE = 700
+
+MODE_GREEDY = 0
+MODE_ANNEALING = 1
+
 def main():
+    global mode
+    mode = MODE_GREEDY
     nf = NoisyFunction(WINDOW_SIZE)
     color_frame = cv2.cvtColor(nf.to_ndarray(), cv2.COLOR_GRAY2RGB)
     cv2.imshow("original", color_frame)
