@@ -10,7 +10,9 @@ NUM_CLIMBERS = 15
 WINDOW_SIZE = 700
 def main():
     nf = NoisyFunction(WINDOW_SIZE)
-
+    color_frame = cv2.cvtColor(nf.to_ndarray(), cv2.COLOR_GRAY2RGB)
+    cv2.imshow("original", color_frame)
+    cv2.waitKey(0)
     best_value = 0
     best_pt = (nf.get_size()/2, nf.get_size()/2)
     stopping_points = []
