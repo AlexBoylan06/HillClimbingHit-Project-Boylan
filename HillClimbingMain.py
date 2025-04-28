@@ -27,6 +27,9 @@ def main():
     print(f"I found the best value = {best_value} at {best_pt}")
     print(f"It took an average of {total_steps / len(stopping_points)} steps to reach these points.")
 
+def in_bounds(pt:Tuple[int, int])-> bool:
+   return pt[0]>-1 and pt[1]>-1 and pt[0]<WINDOW_SIZE and pt[1]<WINDOW_SIZE
+
 def climb_hill_to_max(func:NoisyFunction) -> Tuple[List[Tuple[int, int]],Tuple[int,int]]:
     """
     starting at a random location, finds a (local?) maximum.
@@ -45,7 +48,7 @@ def climb_hill_to_max(func:NoisyFunction) -> Tuple[List[Tuple[int, int]],Tuple[i
         random.shuffle(relative_steps)
         for delta in relative_steps:
             temp_pt = (pt[0]+delta[0], pt[1]+delta[1])
-            if temp_pt[0] < 0 or temp_pt[1] < 0 or temp_pt[0]>=WINDOW_SIZE or temp_pt[1]>=WINDOW_SIZE:
+            if not in_bounds(temp_pt):
                 continue
             if func.get_value_at_point(temp_pt) > val_to_beat:
                 pt = temp_pt
