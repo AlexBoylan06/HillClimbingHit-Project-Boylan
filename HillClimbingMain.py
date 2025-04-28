@@ -8,7 +8,13 @@ import random
 
 NUM_CLIMBERS = 15
 WINDOW_SIZE = 700
+
+MODE_GREEDY = 0
+MODE_ANNEALING = 1
+
 def main():
+    global mode
+    mode = MODE_GREEDY
     nf = NoisyFunction(WINDOW_SIZE)
 
     best_value = 0
