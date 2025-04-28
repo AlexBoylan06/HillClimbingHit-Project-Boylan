@@ -39,24 +39,51 @@ def climb_hill_to_max(func:NoisyFunction) -> Tuple[List[Tuple[int, int]],Tuple[i
     pt = (random.randint(0, func.get_size()), random.randint(0, func.get_size()))
     stops: List[Tuple[int, int]] = []
 
-    relative_steps = [(0,1), (1,0), (0,-1), (-1,0)]
-    should_keep_checking = True
-    while should_keep_checking:
-        stops.append(pt)
-        val_to_beat = func.get_value_at_point(pt)
-        should_keep_checking = False  # assume we don't find a worthwhile step to make...
-        random.shuffle(relative_steps)
-        for delta in relative_steps:
-            temp_pt = (pt[0]+delta[0], pt[1]+delta[1])
-            if not in_bounds(temp_pt):
-                continue
-            if func.get_value_at_point(temp_pt) > val_to_beat:
-                pt = temp_pt
-                should_keep_checking = True  # we took a step, so keep looking.
-                break
-
-    # if we got here, then after our last move, none of the four directions showed an improvement.
+    temp = 1
+    alpha = 0.9
+    min_temp = 0.0001
+    iterations_per_temp = 7
+    step_multiplier = 100
+    best = 0.0
+    best_pt = None
+    while temp > min_temp:
+        for i in range(iterations_per_temp):
+            new_pt = (max(0, min(func.get_size() - 1, int(pt[0] + (np.random.randn()) * step_multiplier))),
+                      max(0, min(func.get_size() - 1, int(pt[1] + (np.random.randn()) * step_multiplier))))
+            new_val = func.get_value_at_point(new_pt)
+            diff = new_val - func.get_value_at_point(pt)
+            probability = math.exp(diff / temp)
+            # print(f"{diff=}\t{temp=}\t{probability=}")
+            if new_val > best or probability > random.random():
+                pt = new_pt
+                if new_val > best:
+                    best = new_val
+                    best_pt = pt
+                stops.append(pt)
+        temp *= alpha
+        # print(f"{temp=}")
+    # print (f"{best=}")
+    pt = best_pt
     return stops, pt
+
+    # relative_steps = [(0,1), (1,0), (0,-1), (-1,0)]
+    # should_keep_checking = True
+    # while should_keep_checking:
+    #     stops.append(pt)
+    #     val_to_beat = func.get_value_at_point(pt)
+    #     should_keep_checking = False  # assume we don't find a worthwhile step to make...
+    #     random.shuffle(relative_steps)
+    #     for delta in relative_steps:
+    #         temp_pt = (pt[0]+delta[0], pt[1]+delta[1])
+    #         if not in_bounds(temp_pt):
+    #             continue
+    #         if func.get_value_at_point(temp_pt) > val_to_beat:
+    #             pt = temp_pt
+    #             should_keep_checking = True  # we took a step, so keep looking.
+    #             break
+    #
+    # # if we got here, then after our last move, none of the four directions showed an improvement.
+    # return stops, pt
 
 if __name__ == "__main__":
     main()
