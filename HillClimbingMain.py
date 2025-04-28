@@ -45,6 +45,11 @@ def climb_hill_to_max(func:NoisyFunction) -> Tuple[List[Tuple[int, int]],Tuple[i
     pt = (random.randint(0, func.get_size()), random.randint(0, func.get_size()))
     stops: List[Tuple[int, int]] = []
 
+    if mode == MODE_GREEDY:
+        # the code for greedy hill climbing
+    elif mode == MODE_ANNEALING:
+        # the code for simulated annealing
+
     temp = 1
     alpha = 0.9
     min_temp = 0.0001
