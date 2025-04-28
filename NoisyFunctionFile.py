@@ -1,5 +1,6 @@
 from perlin_noise import PerlinNoise  # Note: you'll need to import "perlin-noise" into your pyhon interpreter.
 from typing import Tuple, List, Union
+import numpy as np
 class NoisyFunction:
     def __init__(self,size):
         noiseMaker = PerlinNoise(octaves=4)
@@ -13,6 +14,10 @@ class NoisyFunction:
 
     def get_size(self):
         return len(self.values)
+
+    def to_ndarray(self):
+        temp = np.array(self.values)
+        return (temp * 256).astype(np.uint8)
 
     def get_value_at(self, r: int, c: int) -> float:
         return self.values[r][c]
