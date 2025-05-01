@@ -40,9 +40,13 @@ def main():
         if nf.get_value_at_point(pt) > best_value:
             best_value = nf.get_value_at_point(pt)
             best_pt = pt
-
+    num_at_best_point = 0
     for pt in stopping_points:
         cv2.circle(color_frame, center=(pt[1], pt[0]), radius=7, color=(255, 0, 0), thickness=-1)
+        if pt == best_pt:
+            num_at_best_point += 1
+        cv2.putText(color_frame, f"{num_at_best_point}", (best_pt[1] - 4, best_pt[0] + 4), cv2.FONT_HERSHEY_PLAIN, 0.75,
+                    (255, 255, 0))
     if best_pt is not None:
         cv2.line(color_frame, pt1=(best_pt[1] - 10, best_pt[0]), pt2=(best_pt[1] - 15, best_pt[0]), color=(0, 0, 0),
                  thickness=2)
