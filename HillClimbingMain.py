@@ -11,10 +11,11 @@ WINDOW_SIZE = 700
 
 MODE_GREEDY = 0
 MODE_ANNEALING = 1
+MODE_GRADIENT = 2
 
 def main():
     global mode
-    mode = MODE_GREEDY
+    mode = MODE_ANNEALING
     nf = NoisyFunction(WINDOW_SIZE)
     color_frame = cv2.cvtColor(nf.to_ndarray(), cv2.COLOR_GRAY2RGB)
     cv2.imshow("original", color_frame)
@@ -76,37 +77,37 @@ def climb_hill_to_max(func:NoisyFunction) -> Tuple[List[Tuple[int, int]],Tuple[i
     pt = (random.randint(0, func.get_size()), random.randint(0, func.get_size()))
     stops: List[Tuple[int, int]] = []
 
-    if mode == MODE_GREEDY:
-        # the code for greedy hill climbing
-    elif mode == MODE_ANNEALING:
-        # the code for simulated annealing
+    # if mode == MODE_GREEDY:
+    #     # the code for greedy hill climbing
+    # elif mode == MODE_ANNEALING:
+    #     # the code for simulated annealing
 
-    temp = 1
-    alpha = 0.9
-    min_temp = 0.0001
-    iterations_per_temp = 7
-    step_multiplier = 100
-    best = 0.0
-    best_pt = None
-    while temp > min_temp:
-        for i in range(iterations_per_temp):
-            new_pt = (max(0, min(func.get_size() - 1, int(pt[0] + (np.random.randn()) * step_multiplier))),
-                      max(0, min(func.get_size() - 1, int(pt[1] + (np.random.randn()) * step_multiplier))))
-            new_val = func.get_value_at_point(new_pt)
-            diff = new_val - func.get_value_at_point(pt)
-            probability = math.exp(diff / temp)
-            # print(f"{diff=}\t{temp=}\t{probability=}")
-            if new_val > best or probability > random.random():
-                pt = new_pt
-                if new_val > best:
-                    best = new_val
-                    best_pt = pt
-                stops.append(pt)
-        temp *= alpha
-        # print(f"{temp=}")
-    # print (f"{best=}")
-    pt = best_pt
-    return stops, pt
+    # temp = 1
+    # alpha = 0.9
+    # min_temp = 0.0001
+    # iterations_per_temp = 7
+    # step_multiplier = 100
+    # best = 0.0
+    # best_pt = None
+    # while temp > min_temp:
+    #     for i in range(iterations_per_temp):
+    #         new_pt = (max(0, min(func.get_size() - 1, int(pt[0] + (np.random.randn()) * step_multiplier))),
+    #                   max(0, min(func.get_size() - 1, int(pt[1] + (np.random.randn()) * step_multiplier))))
+    #         new_val = func.get_value_at_point(new_pt)
+    #         diff = new_val - func.get_value_at_point(pt)
+    #         probability = math.exp(diff / temp)
+    #         # print(f"{diff=}\t{temp=}\t{probability=}")
+    #         if new_val > best or probability > random.random():
+    #             pt = new_pt
+    #             if new_val > best:
+    #                 best = new_val
+    #                 best_pt = pt
+    #             stops.append(pt)
+    #     temp *= alpha
+    #     # print(f"{temp=}")
+    # # print (f"{best=}")
+    # pt = best_pt
+    # return stops, pt
 
     # relative_steps = [(0,1), (1,0), (0,-1), (-1,0)]
     # should_keep_checking = True
@@ -126,6 +127,28 @@ def climb_hill_to_max(func:NoisyFunction) -> Tuple[List[Tuple[int, int]],Tuple[i
     #
     # # if we got here, then after our last move, none of the four directions showed an improvement.
     # return stops, pt
+
+    step_multiplier = 15000
+    alpha = 0.99
+    while True:
+        stops.append(pt)
+        if pt[0] == 0:
+            d_r = func.get_value_at(1, pt[1]) - func.get_value_at_point(pt)
+        else:
+            d_r = func.get_value_at_point(pt) - func.get_value_at(pt[0] - 1, pt[1])
+        if pt[1] == 0:
+            d_c = func.get_value_at(pt[0], 1) - func.get_value_at_point(pt)
+        else:
+            d_c = func.get_value_at_point(pt) - func.get_value_at(pt[0], pt[1] - 1)
+        new_pt = (max(0, min(func.get_size() - 1, int(pt[0] + step_multiplier * d_r / func.get_value_at_point(pt)))),
+                  max(0, min(func.get_size() - 1, int(pt[1] + step_multiplier * d_c / func.get_value_at_point(pt)))))
+        # print(f"{d_r=:3.2}\t{d_c=:3.2}\t{start_pt=}\t{new_pt=}")
+        if new_pt == pt:
+            break
+        step_multiplier *= alpha
+        pt = new_pt
+    # print(f"{step_multiplier=}")
+    return stops, pt
 
 if __name__ == "__main__":
     main()
