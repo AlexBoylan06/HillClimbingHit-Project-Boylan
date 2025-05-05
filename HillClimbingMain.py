@@ -16,7 +16,9 @@ def main():
     global mode
     mode = MODE_GREEDY
     nf = NoisyFunction(WINDOW_SIZE)
-
+    color_frame = cv2.cvtColor(nf.to_ndarray(), cv2.COLOR_GRAY2RGB)
+    cv2.imshow("original", color_frame)
+    cv2.waitKey(1)
     best_value = 0
     best_pt = (nf.get_size()/2, nf.get_size()/2)
     stopping_points = []
@@ -25,13 +27,42 @@ def main():
         stops, pt = climb_hill_to_max(nf)
         print(f"{pt} by way of {stops}")
 
+        clr = (random.randint(0, 196), random.randint(0, 196), random.randint(0, 196))
+        if len(stops) > 0:
+            p1 = stops[0]
+            for j in range(1, len(stops)):
+                p2 = stops[j]
+                cv2.line(color_frame, pt1=(p1[1], p1[0]), pt2=(p2[1], p2[0]), color=clr, thickness=1)
+                p1 = p2
+
         stopping_points.append(pt)
         total_steps += len(stops)
         if nf.get_value_at_point(pt) > best_value:
             best_value = nf.get_value_at_point(pt)
             best_pt = pt
+    num_at_best_point = 0
+    for pt in stopping_points:
+        cv2.circle(color_frame, center=(pt[1], pt[0]), radius=7, color=(255, 0, 0), thickness=-1)
+        if pt == best_pt:
+            num_at_best_point += 1
+        cv2.putText(color_frame, f"{num_at_best_point}", (best_pt[1] - 4, best_pt[0] + 4), cv2.FONT_HERSHEY_PLAIN, 0.75,
+                    (255, 255, 0))
+    if best_pt is not None:
+        cv2.line(color_frame, pt1=(best_pt[1] - 10, best_pt[0]), pt2=(best_pt[1] - 15, best_pt[0]), color=(0, 0, 0),
+                 thickness=2)
+        cv2.line(color_frame, pt1=(best_pt[1] + 10, best_pt[0]), pt2=(best_pt[1] + 15, best_pt[0]), color=(0, 0, 0),
+                 thickness=2)
+        cv2.line(color_frame, pt1=(best_pt[1], best_pt[0] - 10), pt2=(best_pt[1], best_pt[0] - 15), color=(0, 0, 0),
+                 thickness=2)
+        cv2.line(color_frame, pt1=(best_pt[1], best_pt[0] + 10), pt2=(best_pt[1], best_pt[0] + 15), color=(0, 0, 0),
+                 thickness=2)
+
     print(f"I found the best value = {best_value} at {best_pt}")
     print(f"It took an average of {total_steps / len(stopping_points)} steps to reach these points.")
+
+    cv2.imshow("discovery", color_frame)
+    cv2.moveWindow("discovery", nf.get_size(), 0)
+    cv2.waitKey(0)
 
 def in_bounds(pt:Tuple[int, int])-> bool:
    return pt[0]>-1 and pt[1]>-1 and pt[0]<WINDOW_SIZE and pt[1]<WINDOW_SIZE
