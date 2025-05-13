@@ -16,6 +16,7 @@ def main():
     global mode
     mode = MODE_GREEDY
     nf = NoisyFunction(WINDOW_SIZE)
+    actual_max, actual_max_pt = nf.actual_max()
     color_frame = cv2.cvtColor(nf.to_ndarray(), cv2.COLOR_GRAY2RGB)
     cv2.imshow("original", color_frame)
     cv2.waitKey(1)
@@ -41,10 +42,13 @@ def main():
             best_value = nf.get_value_at_point(pt)
             best_pt = pt
     num_at_best_point = 0
+    num_at_actual_point = 0
     for pt in stopping_points:
         cv2.circle(color_frame, center=(pt[1], pt[0]), radius=7, color=(255, 0, 0), thickness=-1)
         if pt == best_pt:
             num_at_best_point += 1
+        if pt == actual_max_pt:
+            num_at_actual_point += 1
         cv2.putText(color_frame, f"{num_at_best_point}", (best_pt[1] - 4, best_pt[0] + 4), cv2.FONT_HERSHEY_PLAIN, 0.75,
                     (255, 255, 0))
     if best_pt is not None:
@@ -58,7 +62,18 @@ def main():
                  thickness=2)
 
     print(f"I found the best value = {best_value} at {best_pt}")
+    print(f"The actual best value  = {actual_max} at {actual_max_pt}.")
+    print(f"{int(num_at_actual_point / NUM_CLIMBERS * 100)}% of the {NUM_CLIMBERS} stopping points were close to the actual location.")
     print(f"It took an average of {total_steps / len(stopping_points)} steps to reach these points.")
+    # draw "X" around actual max point.
+    cv2.line(color_frame, pt1=(actual_max_pt[1] - 8, actual_max_pt[0] - 8),
+             pt2=(actual_max_pt[1] - 12, actual_max_pt[0] - 12), color=(0, 0, 0,), thickness=2)
+    cv2.line(color_frame, pt1=(actual_max_pt[1] + 8, actual_max_pt[0] + 8),
+             pt2=(actual_max_pt[1] + 12, actual_max_pt[0] + 12), color=(0, 0, 0,), thickness=2)
+    cv2.line(color_frame, pt1=(actual_max_pt[1] + 8, actual_max_pt[0] - 8),
+             pt2=(actual_max_pt[1] + 12, actual_max_pt[0] - 12), color=(0, 0, 0,), thickness=2)
+    cv2.line(color_frame, pt1=(actual_max_pt[1] - 8, actual_max_pt[0] + 8),
+             pt2=(actual_max_pt[1] - 12, actual_max_pt[0] + 12), color=(0, 0, 0,), thickness=2)
 
     cv2.imshow("discovery", color_frame)
     cv2.moveWindow("discovery", nf.get_size(), 0)
